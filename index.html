@@ -462,6 +462,61 @@
       .grid { grid-template-columns: 1fr; }
       .hero-titre { font-size: 2.2rem; }
     }
+
+    /* ══════════ RECHERCHE ══════════ */
+    .search-bar {
+      position: relative; z-index: 1;
+      max-width: 600px; margin: 0 auto 40px;
+      padding: 0 24px;
+    }
+    .search-wrap {
+      position: relative;
+      display: flex; align-items: center;
+    }
+    .search-icon {
+      position: absolute; left: 16px;
+      font-size: 1rem; opacity: 0.5;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(139,0,0,0.3);
+      border-radius: 50px;
+      padding: 14px 20px 14px 44px;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .search-input::placeholder { color: rgba(255,255,255,0.3); }
+    .search-input:focus {
+      border-color: var(--rouge2);
+      background: rgba(139,0,0,0.1);
+    }
+    .search-clear {
+      position: absolute; right: 16px;
+      background: none; border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 1rem; cursor: pointer;
+      display: none;
+    }
+    .search-results-info {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--texte);
+      margin-top: 10px;
+    }
+    .no-results {
+      text-align: center;
+      padding: 40px 20px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--texte);
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -558,6 +613,16 @@
   </div>
 </div>
 
+<!-- BARRE DE RECHERCHE -->
+<div class="search-bar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" id="recherche" placeholder="Rechercher une série ou un épisode…" oninput="rechercherContenu(this.value)"/>
+    <button class="search-clear" id="search-clear" onclick="effacerRecherche()">✕</button>
+  </div>
+  <div class="search-results-info" id="search-info"></div>
+</div>
+
 <!-- CATALOGUE SÉRIES -->
 <div class="catalogue">
   <div class="section-titre">Séries disponibles</div>
@@ -635,6 +700,8 @@ const CATALOGUE = [
       { saison:'S1', num:1, titre:'Grachi — Saison 1 · Épisode 1', desc:'Le premier épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'qlx3xovJXjuzv47', nouveau:true },
       { saison:'S1', num:2, titre:'Grachi — Saison 1 · Épisode 2', desc:'Le deuxième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'XJ28jB9w20sDlWZ', nouveau:true },
       { saison:'S1', num:3, titre:'Grachi — Saison 1 · Épisode 3', desc:'Le troisième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'RBmW6AJZR6idrRX', nouveau:true },
+      { saison:'S1', num:7, titre:'Grachi — Saison 1 · Épisode 7', desc:'Le septième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'b3Wpyg4wqktPwpQ', nouveau:true },
+      { saison:'S1', num:8, titre:'Grachi — Saison 1 · Épisode 8', desc:'Le huitième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'1D1l003dovFeYvg', nouveau:true },
     ]
   }
   // ── Pour ajouter une nouvelle série plus tard, copie ce bloc ──
@@ -754,7 +821,86 @@ function afficherGrille(serie) {
   });
 }
 
-function ouvrirModal(ep) {
+function rechercherContenu(query) {
+  const clearBtn = document.getElementById('search-clear');
+  const info = document.getElementById('search-info');
+  clearBtn.style.display = query ? 'block' : 'none';
+
+  if (!query.trim()) {
+    info.textContent = '';
+    // Réafficher tout normalement
+    document.querySelector('.catalogue').style.display = '';
+    document.querySelector('.section-eps').style.display = '';
+    afficherSerie();
+    return;
+  }
+
+  const q = query.toLowerCase();
+
+  // Chercher dans tous les épisodes de toutes les séries
+  const resultats = [];
+  CATALOGUE.forEach(serie => {
+    // Chercher dans le nom de la série
+    const serieMatch = serie.nom.toLowerCase().includes(q);
+    serie.episodes.forEach(ep => {
+      if (serieMatch || ep.titre.toLowerCase().includes(q) || ep.desc.toLowerCase().includes(q)) {
+        resultats.push({ serie, ep });
+      }
+    });
+  });
+
+  // Afficher les résultats
+  const grid = document.getElementById('grid');
+  document.querySelector('.catalogue').style.display = 'none';
+  document.querySelector('.section-eps').style.display = '';
+  document.getElementById('serie-header').innerHTML = `
+    <div class="serie-icon-grand">🔍</div>
+    <div>
+      <div class="serie-nom-grand">Résultats de recherche</div>
+      <div class="serie-info">"${query}"</div>
+    </div>`;
+  document.getElementById('tabs').innerHTML = '';
+
+  grid.innerHTML = '';
+  if (resultats.length === 0) {
+    grid.innerHTML = `<div class="no-results" style="display:block">Aucun résultat pour "<strong>${query}</strong>" 🌹</div>`;
+    info.textContent = '';
+    return;
+  }
+
+  info.textContent = `${resultats.length} résultat${resultats.length > 1 ? 's' : ''} trouvé${resultats.length > 1 ? 's' : ''}`;
+
+  resultats.forEach(({ serie, ep }, i) => {
+    const miniSrc = ep.type === 'youtube' ? `https://img.youtube.com/vi/${ep.videoId}/hqdefault.jpg` : '';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.animationDelay = `${i * 0.07}s`;
+    card.innerHTML = `
+      <div class="thumb">
+        ${miniSrc ? `<img src="${miniSrc}" alt="${ep.titre}" onerror="this.style.display='none'">` : ''}
+        <div class="thumb-overlay">
+          <div class="play-btn">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+        <div class="ep-badge">${serie.nom} · ${ep.saison} · Ép. ${ep.num}</div>
+        ${ep.nouveau ? '<div class="new-badge">Nouveau</div>' : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-titre">${ep.titre}</div>
+        <div class="card-meta"><span>🇫🇷 Sous-titres</span><span class="card-dot">✦</span><span>HD</span></div>
+      </div>`;
+    card.onclick = () => ouvrirModal(ep);
+    grid.appendChild(card);
+  });
+}
+
+function effacerRecherche() {
+  document.getElementById('recherche').value = '';
+  rechercherContenu('');
+}
+
+
   let contenu = '';
   if (ep.type === 'youtube') {
     contenu = `<iframe src="https://www.youtube.com/embed/${ep.videoId}?autoplay=1&rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
