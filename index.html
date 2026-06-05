@@ -828,19 +828,14 @@ function rechercherContenu(query) {
 
   if (!query.trim()) {
     info.textContent = '';
-    // Réafficher tout normalement
-    document.querySelector('.catalogue').style.display = '';
-    document.querySelector('.section-eps').style.display = '';
+    document.getElementById('serie-liste').parentElement.style.display = '';
     afficherSerie();
     return;
   }
 
   const q = query.toLowerCase();
-
-  // Chercher dans tous les épisodes de toutes les séries
   const resultats = [];
   CATALOGUE.forEach(serie => {
-    // Chercher dans le nom de la série
     const serieMatch = serie.nom.toLowerCase().includes(q);
     serie.episodes.forEach(ep => {
       if (serieMatch || ep.titre.toLowerCase().includes(q) || ep.desc.toLowerCase().includes(q)) {
@@ -849,10 +844,8 @@ function rechercherContenu(query) {
     });
   });
 
-  // Afficher les résultats
-  const grid = document.getElementById('grid');
-  document.querySelector('.catalogue').style.display = 'none';
-  document.querySelector('.section-eps').style.display = '';
+  document.getElementById('serie-liste').parentElement.style.display = 'none';
+
   document.getElementById('serie-header').innerHTML = `
     <div class="serie-icon-grand">🔍</div>
     <div>
@@ -861,9 +854,11 @@ function rechercherContenu(query) {
     </div>`;
   document.getElementById('tabs').innerHTML = '';
 
+  const grid = document.getElementById('grid');
   grid.innerHTML = '';
+
   if (resultats.length === 0) {
-    grid.innerHTML = `<div class="no-results" style="display:block">Aucun résultat pour "<strong>${query}</strong>" 🌹</div>`;
+    grid.innerHTML = `<div style="text-align:center;padding:40px;font-family:'Cormorant Garamond',serif;font-style:italic;color:rgba(255,220,220,0.5)">Aucun résultat pour "<strong>${query}</strong>" 🌹</div>`;
     info.textContent = '';
     return;
   }
