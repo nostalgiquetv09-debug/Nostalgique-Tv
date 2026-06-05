@@ -758,6 +758,10 @@ function ouvrirModal(ep) {
     contenu = `<iframe src="https://www.youtube.com/embed/${ep.videoId}?autoplay=1&rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
   } else if (ep.type === 'drive') {
     contenu = `<iframe src="https://drive.google.com/file/d/${ep.videoId}/preview" allowfullscreen allow="autoplay"></iframe>`;
+  } else if (ep.type === 'streamtape') {
+    // Streamtape bloque les iframes — on ouvre dans un nouvel onglet
+    window.open(`https://streamtape.com/v/${ep.videoId}`, '_blank');
+    return;
   }
   document.getElementById('modal-video').innerHTML = contenu;
   document.getElementById('modal-titre').textContent = ep.titre;
