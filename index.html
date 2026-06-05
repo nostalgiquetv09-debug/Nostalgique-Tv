@@ -692,7 +692,7 @@ const CATALOGUE = [
       { saison:'S1', num:3, titre:'Grachi — Saison 1 · Épisode 3', desc:'Le troisième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'RBmW6AJZR6idrRX', nouveau:true },
       { saison:'S1', num:7, titre:'Grachi — Saison 1 · Épisode 7', desc:'Le septième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'b3Wpyg4wqktPwpQ', nouveau:true },
       { saison:'S1', num:8, titre:'Grachi — Saison 1 · Épisode 8', desc:'Le huitième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'1D1l003dovFeYvg', nouveau:true },
-      { saison:'S1', num:9, titre:'Grachi — Saison 1 · Épisode 9', desc:'Le neuvième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'QdWWPWOJy3S06er', nouveau:true },
+      { saison:'S1', num:9, titre:'Grachi — Saison 1 · Épisode 9', desc:'Le neuvième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'QdWWPWOJy3S06er', altType:'playmogo', altVideoId:'b8t60p1dt53a', nouveau:true },
     ]
   }
   // ── Pour ajouter une nouvelle série plus tard, copie ce bloc ──
@@ -814,22 +814,51 @@ function afficherGrille(serie) {
   });
 }
 
+function getContenu(type, videoId) {
+  if (type === 'youtube') {
+    return `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+  } else if (type === 'drive') {
+    return `<iframe src="https://drive.google.com/file/d/${videoId}/preview" allowfullscreen allow="autoplay"></iframe>`;
+  } else if (type === 'playmogo') {
+    return `<iframe width="100%" height="100%" src="https://playmogo.com/e/${videoId}" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay"></iframe>`;
+  }
+  return '';
+}
+
 function ouvrirModal(ep) {
-  let contenu = '';
-  if (ep.type === 'youtube') {
-    contenu = `<iframe src="https://www.youtube.com/embed/${ep.videoId}?autoplay=1&rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
-  } else if (ep.type === 'drive') {
-    contenu = `<iframe src="https://drive.google.com/file/d/${ep.videoId}/preview" allowfullscreen allow="autoplay"></iframe>`;
-  } else if (ep.type === 'streamtape') {
-    // Streamtape bloque les iframes — on ouvre dans un nouvel onglet
+  if (ep.altType) {
+    document.getElementById('modal-video').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--blanc);text-align:center;margin-bottom:8px;">Choisir le lecteur</div>
+        <button onclick="chargerLecteur('${ep.altType}','${ep.altVideoId}')" style="background:rgba(139,0,0,0.7);border:1px solid var(--rouge2);color:#fff;padding:14px 28px;border-radius:50px;font-size:1rem;cursor:pointer;width:220px;">
+          ▶ Lire sur Doodstream
+        </button>
+        <button onclick="window.open('https://streamtape.com/v/${ep.videoId}','_blank')" style="background:rgba(30,30,30,0.8);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:14px 28px;border-radius:50px;font-size:1rem;cursor:pointer;width:220px;">
+          ▶ Lire sur Streamtape
+        </button>
+      </div>`;
+    document.getElementById('modal-titre').textContent = ep.titre;
+    document.getElementById('modal-desc').textContent = ep.desc;
+    document.getElementById('modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+
+  if (ep.type === 'streamtape') {
     window.open(`https://streamtape.com/v/${ep.videoId}`, '_blank');
     return;
   }
+  const contenu = getContenu(ep.type, ep.videoId);
   document.getElementById('modal-video').innerHTML = contenu;
   document.getElementById('modal-titre').textContent = ep.titre;
   document.getElementById('modal-desc').textContent = ep.desc;
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function chargerLecteur(type, videoId) {
+  const contenu = getContenu(type, videoId);
+  document.getElementById('modal-video').innerHTML = contenu;
 }
 
 function fermerModal(e) {
