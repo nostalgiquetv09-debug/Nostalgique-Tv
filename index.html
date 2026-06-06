@@ -693,6 +693,7 @@ const CATALOGUE = [
       { saison:'S1', num:7, titre:'Grachi — Saison 1 · Épisode 7', desc:'Le septième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'b3Wpyg4wqktPwpQ', nouveau:true },
       { saison:'S1', num:8, titre:'Grachi — Saison 1 · Épisode 8', desc:'Le huitième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'1D1l003dovFeYvg', nouveau:true },
       { saison:'S1', num:9, titre:'Grachi — Saison 1 · Épisode 9', desc:'Le neuvième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'QdWWPWOJy3S06er', altType:'playmogo', altVideoId:'b8t60p1dt53a', nouveau:true },
+      { saison:'S1', num:10, titre:'Grachi — Saison 1 · Épisode 10', desc:'Le dixième épisode de Grachi, sous-titré en français.', type:'streamtape', videoId:'P6OzMZ7wmvt0Q2V', altType:'playmogo', altVideoId:'5stcj8kxfrr5', nouveau:true },
     ]
   }
   // ── Pour ajouter une nouvelle série plus tard, copie ce bloc ──
@@ -821,6 +822,8 @@ function getContenu(type, videoId) {
     return `<iframe src="https://drive.google.com/file/d/${videoId}/preview" allowfullscreen allow="autoplay"></iframe>`;
   } else if (type === 'playmogo') {
     return `<iframe width="100%" height="100%" src="https://playmogo.com/e/${videoId}" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay"></iframe>`;
+  } else if (type === 'streamtape') {
+    return `<iframe src="https://streamtape.com/e/${videoId}" width="100%" height="100%" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
   }
   return '';
 }
@@ -833,7 +836,7 @@ function ouvrirModal(ep) {
         <button onclick="chargerLecteur('${ep.altType}','${ep.altVideoId}')" style="background:rgba(139,0,0,0.7);border:1px solid var(--rouge2);color:#fff;padding:14px 28px;border-radius:50px;font-size:1rem;cursor:pointer;width:220px;">
           ▶ Lire sur Doodstream
         </button>
-        <button onclick="window.open('https://streamtape.com/v/${ep.videoId}','_blank')" style="background:rgba(30,30,30,0.8);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:14px 28px;border-radius:50px;font-size:1rem;cursor:pointer;width:220px;">
+        <button onclick="chargerLecteur('streamtape','${ep.videoId}')" style="background:rgba(30,30,30,0.8);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:14px 28px;border-radius:50px;font-size:1rem;cursor:pointer;width:220px;">
           ▶ Lire sur Streamtape
         </button>
       </div>`;
